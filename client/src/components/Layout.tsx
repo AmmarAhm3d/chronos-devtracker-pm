@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useAuthStore } from '../store/auth';
 import { useNavigate } from 'react-router-dom';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
   const { clearAuth, user } = useAuthStore();
   const navigate = useNavigate();
   return (

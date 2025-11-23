@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import projectRoutes from './routes/projects.js';
-import taskRoutes from './routes/tasks.js';
+import authRoutes from './routes/auth';
+import projectRoutes from './routes/projects';
+import taskRoutes from './routes/tasks';
 
 // Load environment variables
 dotenv.config({ path: '../.env' }); // Load .env from repository root (one level up from server/)
