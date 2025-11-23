@@ -1,36 +1,47 @@
 {
-  "name": "server",
+  "name": "chronos-devtracker",
   "version": "1.0.0",
-  "type": "module",
-  "description": "Chronos DevTracker Backend API - Express + TypeScript + Prisma",
-  "main": "dist/index.js",
+  "private": true,
+  "description": "Portfolio Project Management Application - Full-stack TypeScript CRUD app with React, Express, PostgreSQL",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "prisma:seed": "tsx prisma/seed.ts",
-    "test": "jest"
-  },
-  "dependencies": {
-    "@prisma/client": "^5.20.0",
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "zod": "^3.23.8"
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w server && npm run build -w client",
+    "test": "npm run test -w server && npm run test -w client",
+    "test:e2e": "playwright test",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "prisma:migrate": "npm run prisma:migrate -w server",
+    "prisma:studio": "npm run prisma:studio -w server"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^22.5.4",
-    "prisma": "^5.20.0",
-    "tsx": "^4.19.0",
-    "typescript": "^5.6.2"
-  }
+    "@playwright/test": "^1.56.1",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/chronos-devtracker.git"
+  },
+  "keywords": [
+    "typescript",
+    "react",
+    "express",
+    "prisma",
+    "postgresql",
+    "jwt",
+    "fullstack",
+    "portfolio",
+    "project-management",
+    "tailwindcss",
+    "playwright"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT"
 }

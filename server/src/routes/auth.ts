@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
-import prisma from '../lib/prisma';
-import { generateToken } from '../lib/jwt';
-import { validate } from '../middleware/validate';
+import prisma from '../lib/prisma.js';
+import { generateToken } from '../lib/jwt.js';
+import { validate } from '../middleware/validate.js';
 
 const router = Router();
 
