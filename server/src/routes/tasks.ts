@@ -3,7 +3,6 @@ import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { Priority } from '@prisma/client';
 
 const router = Router();
 
@@ -44,7 +43,7 @@ router.post('/:projectId/tasks', authenticate, validate(createTaskSchema), async
       data: {
         projectId,
         title,
-        priority: (priority as Priority) || 'MEDIUM',
+        priority: priority || 'MEDIUM',
       },
     });
 
@@ -81,7 +80,7 @@ router.put('/:taskId', authenticate, validate(updateTaskSchema), async (req: Aut
       where: { id: taskId },
       data: {
         ...(title && { title }),
-        ...(priority && { priority: priority as Priority }),
+        ...(priority && { priority }),
         ...(completed !== undefined && { completed }),
       },
     });

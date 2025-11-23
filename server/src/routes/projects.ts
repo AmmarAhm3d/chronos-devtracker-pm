@@ -3,7 +3,6 @@ import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { Status } from '@prisma/client';
 
 const router = Router();
 
@@ -55,7 +54,7 @@ router.post('/', authenticate, validate(createProjectSchema), async (req: AuthRe
         userId: req.userId!,
         title,
         description: description || null,
-        status: (status as Status) || 'TODO',
+        status: status || 'TODO',
         repoLink: repoLink || null,
       },
       include: {
@@ -132,7 +131,7 @@ router.put('/:id', authenticate, validate(updateProjectSchema), async (req: Auth
       data: {
         ...(title && { title }),
         ...(description !== undefined && { description }),
-        ...(status && { status: status as Status }),
+        ...(status && { status }),
         ...(repoLink !== undefined && { repoLink: repoLink || null }),
       },
       include: {
