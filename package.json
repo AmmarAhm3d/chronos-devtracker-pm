@@ -1,0 +1,47 @@
+{
+  "name": "chronos-devtracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio Project Management Application - Full-stack TypeScript CRUD app with React, Express, PostgreSQL",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w server && npm run build -w client",
+    "test": "npm run test -w server && npm run test -w client",
+    "test:e2e": "playwright test",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "prisma:migrate": "npm run prisma:migrate -w server",
+    "prisma:studio": "npm run prisma:studio -w server"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/chronos-devtracker.git"
+  },
+  "keywords": [
+    "typescript",
+    "react",
+    "express",
+    "prisma",
+    "postgresql",
+    "jwt",
+    "fullstack",
+    "portfolio",
+    "project-management",
+    "tailwindcss",
+    "playwright"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT"
+}
