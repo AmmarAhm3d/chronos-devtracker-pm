@@ -235,6 +235,20 @@ Before pushing to a public repository:
 - Backend: Railway, Render, or Fly.io (env: `DATABASE_URL`, `JWT_SECRET`, `PORT`)
 - Database: Supabase, Neon, or Railway PostgreSQL
 
+#### GitHub Pages + Render Deployment
+For deploying the frontend to GitHub Pages with backend on Render:
+
+1. **Backend (Render)**:
+   - Deploy the `server/` directory to Render
+   - Set environment variables: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `PORT`
+   - Note your Render URL (e.g., `https://chronos-devtracker-pm.onrender.com`)
+
+2. **Frontend (GitHub Pages)**:
+   - Add a repository secret `VITE_API_URL` with value: `https://your-render-app.onrender.com/api`
+   - Example: `https://chronos-devtracker-pm.onrender.com/api`
+   - The CI workflow uses this secret during the build step to configure the API endpoint
+   - **Important**: Include `/api` at the end of the URL
+
 ### Repo Metadata (package.json)
 Add to root `package.json`:
 ```json
