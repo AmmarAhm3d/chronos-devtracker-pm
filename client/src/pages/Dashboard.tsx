@@ -283,7 +283,7 @@ function Dashboard() {
                         </div>
                       </div>
                       {project.description && (
-                        <p className="text-sm text-slate-500 line-clamp-2 ml-13">
+                        <p className="text-sm text-slate-500 line-clamp-2 ml-12">
                           {project.description}
                         </p>
                       )}
