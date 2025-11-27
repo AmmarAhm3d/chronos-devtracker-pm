@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import api from '../api/axios';
 import { useAuthStore } from '../store/auth';
+import { SignupSchema, getZodFirstError } from '../lib/validation';
 
 function Signup() {
   const [email, setEmail] = useState('');
@@ -15,13 +17,25 @@ function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    // Validate with Zod
+    const validation = SignupSchema.safeParse({ email, password, name: name || undefined });
+    if (!validation.success) {
+      setError(getZodFirstError(validation.error));
+      return;
+    }
+    
     setLoading(true);
     try {
       const res = await api.post('/auth/register', { email, password, name });
       setAuth(res.data.token, res.data.user);
       navigate('/');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Signup failed');
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || 'Signup failed');
+      } else {
+        setError('Signup failed');
+      }
     } finally {
       setLoading(false);
     }

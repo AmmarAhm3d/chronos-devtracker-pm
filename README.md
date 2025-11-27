@@ -3,8 +3,8 @@
 Portfolio-ready full-stack project management application showcasing TypeScript across React (Vite) frontend and Express + Prisma backend with PostgreSQL, JWT auth, and automated E2E tests (Playwright).
 
 ## Tech Stack
-- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS v4 + Zustand + Axios + Recharts
-- **Backend**: Express + TypeScript + Prisma ORM + PostgreSQL (Docker)
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS v4 + Zustand + Axios + Recharts + Zod
+- **Backend**: Express + TypeScript + Prisma ORM + PostgreSQL (Docker) + Zod
 - **Authentication**: JWT (Bearer tokens, bcrypt password hashing)
 - **Testing**: Playwright (@playwright/test) for E2E coverage
 - **Dev Environment**: GitHub Codespaces (Ubuntu 24.04 LTS)
@@ -58,7 +58,11 @@ Portfolio-ready full-stack project management application showcasing TypeScript 
 - Task CRUD nested under projects (title, priority, completion toggle)
 - Dashboard with project status distribution pie chart (Recharts)
 - Project detail view with inline task management
-- Polished UI with reusable components (Layout, Card, StatusBadge)
+- **Edit/Delete projects** directly from project detail view
+- **Optimistic UI updates** for instant task toggling and deletion with automatic rollback on failure
+- **Client-side validation** with Zod schemas for all forms (auth, projects, tasks)
+- **React Error Boundaries** for graceful error handling and recovery
+- Polished UI with reusable components (Layout, Card, StatusBadge, ErrorBoundary)
 - Seed script for demo data (one user, project, three tasks)
 - E2E API & UI tests (auth flows, project/task CRUD)
 
@@ -145,14 +149,20 @@ npx playwright test --ui
 ## Screenshots
 
 ### Dashboard
-![Dashboard with project status pie chart](./screenshot-dashboard.png)  
+![Dashboard with project status pie chart](https://github.com/user-attachments/assets/78a29692-d03a-473e-b14a-de6fa92a6856)  
 *Project listing with status summary visualization (Recharts pie chart) - captured from authenticated session with seeded demo data*
 
-### Project Detail
-![Project detail with task management](https://via.placeholder.com/800x450?text=Project+Detail+Screenshot)  
-*Inline task creation, priority assignment, and completion tracking*
+### Project Detail with Edit/Delete Actions
+![Project detail with task management](https://github.com/user-attachments/assets/69d65b3c-124b-47c2-8670-dcacf9873c04)  
+*Inline task creation, priority assignment, completion tracking, and **Edit/Delete project buttons***
 
-> **Note**: Screenshot shows polished UI with Layout, Card, and StatusBadge components. Additional screenshots can be captured via Playwright MCP browser automation.
+### Project Edit Mode
+![Project edit form](https://github.com/user-attachments/assets/3ddae183-40f0-41e8-ba21-b28d81bfa166)  
+*Edit project details including title, description, status, and repository link with **Zod validation***
+
+### Optimistic UI Updates
+![Task completion with optimistic update](https://github.com/user-attachments/assets/9f8090db-95bc-4658-88d2-7f0de34650c8)  
+*Instant task completion feedback with **optimistic UI updates** - progress ring shows 33% (1 of 3 done) immediately*
 
 ## Seed Data
 Creates `demo@example.com` (password: `password123`), one project, and three tasks. Modify in `server/prisma/seed.ts` if needed.
@@ -177,8 +187,15 @@ docker-compose.yml  # PostgreSQL service
 
 ## Known Limitations & Future Improvements
 - **Backend**: No rate limiting, XSS sanitization, or refresh tokens (medium security risk)
-- **Frontend**: Missing client-side validation, error boundaries, and optimistic UI updates
+- **Frontend**: ~~Missing client-side validation, error boundaries, and optimistic UI updates~~ ✅ Implemented!
 - **Auth**: Token expiration handling relies on 401 responses (no proactive refresh)
+
+### Recently Added (Stage 3 Polish)
+- ✅ **Client-side validation** with Zod schemas for all forms
+- ✅ **React Error Boundaries** for graceful error recovery
+- ✅ **Optimistic UI updates** for instant feedback on task operations
+- ✅ **Project Edit/Delete UI** in project detail view
+- ✅ **TypeScript strict types** replacing `any` types throughout
 
 ### Next Enhancements (Ideas)
 - User profile & password reset
