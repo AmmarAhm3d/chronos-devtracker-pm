@@ -242,7 +242,7 @@ function ProjectDetail() {
                 </div>
                 <h3 className="text-lg font-semibold text-slate-800 mb-2">Delete Project?</h3>
                 <p className="text-slate-500 text-sm mb-6">
-                  Are you sure you want to delete "{project.title}"? This will also delete all {tasks.length} task{tasks.length !== 1 ? 's' : ''} and cannot be undone.
+                  Are you sure you want to delete "{project?.title ?? 'this project'}"? This will also delete all {tasks.length} task{tasks.length !== 1 ? 's' : ''} and cannot be undone.
                 </p>
                 <div className="flex gap-3 justify-center">
                   <button

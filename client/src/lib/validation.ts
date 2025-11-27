@@ -30,11 +30,8 @@ export const ProjectSchema = z.object({
 
 export type ProjectInput = z.infer<typeof ProjectSchema>;
 
-// Create project schema (for new projects)
-export const CreateProjectSchema = ProjectSchema.extend({
-  description: z.string().max(500).optional(),
-  repoLink: z.string().url().optional().or(z.literal('')),
-});
+// Create project schema (same as base schema)
+export const CreateProjectSchema = ProjectSchema;
 
 // Update project schema (all fields optional)
 export const UpdateProjectSchema = ProjectSchema.partial();
