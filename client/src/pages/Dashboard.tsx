@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, Layout, StatusBadge } from '../components';
+import type { Project } from '../types';
+import { CreateProjectSchema, getZodFirstError } from '../lib/validation';
 
 const STATUS_COLORS: Record<string, string> = {
   TODO: '#f59e0b',
@@ -19,11 +21,12 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 function Dashboard() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [validationError, setValidationError] = useState('');
   const [showNewProject, setShowNewProject] = useState(false);
-  const [newProject, setNewProject] = useState({ title: '', description: '', status: 'TODO' });
+  const [newProject, setNewProject] = useState({ title: '', description: '', status: 'TODO' as Project['status'] });
   const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
 
@@ -41,6 +44,15 @@ function Dashboard() {
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate with Zod
+    const validation = CreateProjectSchema.safeParse(newProject);
+    if (!validation.success) {
+      setValidationError(getZodFirstError(validation.error));
+      return;
+    }
+    setValidationError('');
+    
     setCreating(true);
     try {
       const res = await api.post('/projects', newProject);
@@ -206,7 +218,7 @@ function Dashboard() {
                   />
                   <select
                     value={newProject.status}
-                    onChange={e => setNewProject({ ...newProject, status: e.target.value })}
+                    onChange={e => setNewProject({ ...newProject, status: e.target.value as Project['status'] })}
                     className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
                   >
                     <option value="TODO">To Do</option>
@@ -214,11 +226,16 @@ function Dashboard() {
                     <option value="COMPLETE">Complete</option>
                     <option value="ON_HOLD">On Hold</option>
                   </select>
+                  {validationError && (
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
+                      {validationError}
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <button type="submit" disabled={creating} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all duration-200 text-sm">
                       {creating ? 'Creating...' : 'Create Project'}
                     </button>
-                    <button type="button" onClick={() => setShowNewProject(false)} className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm text-sm">
+                    <button type="button" onClick={() => { setShowNewProject(false); setValidationError(''); }} className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm text-sm">
                       Cancel
                     </button>
                   </div>
@@ -274,9 +291,9 @@ function Dashboard() {
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <StatusBadge status={project.status} />
-                            {project._count?.tasks > 0 && (
+                            {(project._count?.tasks ?? 0) > 0 && (
                               <span className="text-xs text-slate-400">
-                                {project._count.tasks} task{project._count.tasks !== 1 ? 's' : ''}
+                                {project._count?.tasks ?? 0} task{(project._count?.tasks ?? 0) !== 1 ? 's' : ''}
                               </span>
                             )}
                           </div>

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { Layout, Card, StatusBadge } from '../components';
+import type { Project, Task, TaskUpdateData } from '../types';
+import { CreateTaskSchema, UpdateProjectSchema, getZodFirstError } from '../lib/validation';
 
 const PRIORITY_STYLES: Record<string, string> = {
   HIGH: 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200/50',
@@ -9,21 +11,46 @@ const PRIORITY_STYLES: Record<string, string> = {
   LOW: 'bg-gradient-to-r from-slate-50 to-gray-50 text-slate-600 border-slate-200/50',
 };
 
+const STATUS_OPTIONS = [
+  { value: 'TODO', label: 'To Do' },
+  { value: 'IN_PROGRESS', label: 'In Progress' },
+  { value: 'COMPLETE', label: 'Complete' },
+  { value: 'ON_HOLD', label: 'On Hold' },
+] as const;
+
 function ProjectDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [project, setProject] = useState<any>(null);
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [newTask, setNewTask] = useState({ title: '', priority: 'MEDIUM' });
+  const [newTask, setNewTask] = useState({ title: '', priority: 'MEDIUM' as Task['priority'] });
   const [addingTask, setAddingTask] = useState(false);
+  
+  // Edit project state
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ title: '', description: '', status: 'TODO' as Project['status'], repoLink: '' });
+  const [saving, setSaving] = useState(false);
+  
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  
+  // Validation errors
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
     api.get(`/projects/${id}`)
       .then(res => {
         setProject(res.data);
-        setTasks(res.data.tasks);
+        setTasks(res.data.tasks || []);
+        setEditForm({
+          title: res.data.title || '',
+          description: res.data.description || '',
+          status: res.data.status || 'TODO',
+          repoLink: res.data.repoLink || '',
+        });
         setLoading(false);
       })
       .catch(() => {
@@ -35,6 +62,15 @@ function ProjectDetail() {
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.title.trim()) return;
+    
+    // Validate with Zod
+    const validation = CreateTaskSchema.safeParse(newTask);
+    if (!validation.success) {
+      setValidationError(getZodFirstError(validation.error));
+      return;
+    }
+    setValidationError('');
+    
     setAddingTask(true);
     try {
       const res = await api.post(`/projects/${id}/tasks`, newTask);
@@ -47,21 +83,85 @@ function ProjectDetail() {
     }
   };
 
-  const handleUpdateTask = async (taskId: string, updates: any) => {
+  // Optimistic update for tasks
+  const handleUpdateTask = useCallback(async (taskId: string, updates: TaskUpdateData) => {
+    // Store previous state for rollback
+    const previousTasks = [...tasks];
+    
+    // Optimistically update the UI
+    setTasks(currentTasks => 
+      currentTasks.map(t => (t.id === taskId ? { ...t, ...updates } : t))
+    );
+    
     try {
       const res = await api.put(`/tasks/${taskId}`, updates);
-      setTasks(tasks.map(t => (t.id === taskId ? res.data : t)));
+      // Update with server response to ensure consistency
+      setTasks(currentTasks => 
+        currentTasks.map(t => (t.id === taskId ? res.data : t))
+      );
     } catch {
+      // Rollback on failure
+      setTasks(previousTasks);
       setError('Failed to update task');
+    }
+  }, [tasks]);
+
+  // Optimistic delete for tasks
+  const handleDeleteTask = useCallback(async (taskId: string) => {
+    // Store previous state for rollback
+    const previousTasks = [...tasks];
+    
+    // Optimistically remove from UI
+    setTasks(currentTasks => currentTasks.filter(t => t.id !== taskId));
+    
+    try {
+      await api.delete(`/tasks/${taskId}`);
+    } catch {
+      // Rollback on failure
+      setTasks(previousTasks);
+      setError('Failed to delete task');
+    }
+  }, [tasks]);
+
+  // Handle project update
+  const handleUpdateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate with Zod
+    const validation = UpdateProjectSchema.safeParse(editForm);
+    if (!validation.success) {
+      setValidationError(getZodFirstError(validation.error));
+      return;
+    }
+    setValidationError('');
+    
+    setSaving(true);
+    try {
+      const res = await api.put(`/projects/${id}`, {
+        title: editForm.title,
+        description: editForm.description || undefined,
+        status: editForm.status,
+        repoLink: editForm.repoLink || undefined,
+      });
+      setProject(res.data);
+      setIsEditing(false);
+    } catch {
+      setError('Failed to update project');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  // Handle project delete
+  const handleDeleteProject = async () => {
+    setDeleting(true);
     try {
-      await api.delete(`/tasks/${taskId}`);
-      setTasks(tasks.filter(t => t.id !== taskId));
+      await api.delete(`/projects/${id}`);
+      navigate('/');
     } catch {
-      setError('Failed to delete task');
+      setError('Failed to delete project');
+      setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -130,29 +230,163 @@ function ProjectDetail() {
           Back to Dashboard
         </button>
 
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2">Delete Project?</h3>
+                <p className="text-slate-500 text-sm mb-6">
+                  Are you sure you want to delete "{project.title}"? This will also delete all {tasks.length} task{tasks.length !== 1 ? 's' : ''} and cannot be undone.
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deleting}
+                    className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm text-sm disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteProject}
+                    disabled={deleting}
+                    className="bg-gradient-to-r from-red-500 to-rose-500 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:from-red-400 hover:to-rose-400 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
+                  >
+                    {deleting ? 'Deleting...' : 'Delete Project'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Project Header */}
         <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-indigo-500/30">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="space-y-3">
-              <h1 className="text-3xl font-bold">{project.title}</h1>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={project.status} />
-                {project.repoLink && (
-                  <a 
-                    href={project.repoLink} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                    </svg>
-                    Repository
-                  </a>
-                )}
-              </div>
-              {project.description && (
-                <p className="text-white/80 max-w-2xl">{project.description}</p>
+            <div className="space-y-3 flex-1">
+              {!isEditing ? (
+                <>
+                  <div className="flex items-start justify-between gap-4">
+                    <h1 className="text-3xl font-bold">{project.title}</h1>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-3 rounded-lg backdrop-blur-sm transition-all duration-200 text-sm flex items-center gap-1.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="bg-red-500/80 hover:bg-red-500 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 text-sm flex items-center gap-1.5"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={project.status} />
+                    {project.repoLink && (
+                      <a 
+                        href={project.repoLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
+                        </svg>
+                        Repository
+                      </a>
+                    )}
+                  </div>
+                  {project.description && (
+                    <p className="text-white/80 max-w-2xl">{project.description}</p>
+                  )}
+                </>
+              ) : (
+                <form onSubmit={handleUpdateProject} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">Title</label>
+                    <input
+                      type="text"
+                      value={editForm.title}
+                      onChange={e => setEditForm({ ...editForm, title: e.target.value })}
+                      className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
+                      placeholder="Project title"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1.5">Description</label>
+                    <textarea
+                      value={editForm.description}
+                      onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                      className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200 resize-none"
+                      placeholder="Project description (optional)"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/80 mb-1.5">Status</label>
+                      <select
+                        value={editForm.status}
+                        onChange={e => setEditForm({ ...editForm, status: e.target.value as Project['status'] })}
+                        className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
+                      >
+                        {STATUS_OPTIONS.map(opt => (
+                          <option key={opt.value} value={opt.value} className="text-slate-800">{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/80 mb-1.5">Repository Link</label>
+                      <input
+                        type="url"
+                        value={editForm.repoLink}
+                        onChange={e => setEditForm({ ...editForm, repoLink: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
+                        placeholder="https://github.com/..."
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="bg-white text-indigo-600 font-medium py-2 px-4 rounded-lg shadow-lg hover:bg-white/90 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
+                    >
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditing(false);
+                        setEditForm({
+                          title: project.title || '',
+                          description: project.description || '',
+                          status: project.status || 'TODO',
+                          repoLink: project.repoLink || '',
+                        });
+                        setValidationError('');
+                      }}
+                      className="bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-4 rounded-lg backdrop-blur-sm transition-all duration-200 text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               )}
             </div>
             
@@ -193,12 +427,12 @@ function ProjectDetail() {
         </div>
 
         {/* Error Message */}
-        {error && (
+        {(error || validationError) && (
           <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
             <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
-            {error}
+            {validationError || error}
           </div>
         )}
 
@@ -221,7 +455,7 @@ function ProjectDetail() {
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Priority</label>
               <select
                 value={newTask.priority}
-                onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
+                onChange={e => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
                 className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
               >
                 <option value="HIGH">🔴 High</option>
