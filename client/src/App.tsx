@@ -5,11 +5,14 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import ProjectDetail from './pages/ProjectDetail';
 
+// Get the base path from Vite config for GitHub Pages deployment
+const basename = import.meta.env.BASE_URL;
+
 function App() {
   const { token } = useAuthStore();
 
   return (
-    <Router>
+    <Router basename={basename}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
