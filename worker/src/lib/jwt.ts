@@ -101,8 +101,8 @@ export async function generateToken(payload: JWTPayload, secret: string, expires
   };
 
   const encoder = new TextEncoder();
-  const headerB64 = base64UrlEncode(encoder.encode(JSON.stringify(header)));
-  const payloadB64 = base64UrlEncode(encoder.encode(JSON.stringify(claims)));
+  const headerB64 = base64UrlEncode(encoder.encode(JSON.stringify(header)).buffer);
+  const payloadB64 = base64UrlEncode(encoder.encode(JSON.stringify(claims)).buffer);
 
   const message = `${headerB64}.${payloadB64}`;
   const signature = await sign(message, secret);
