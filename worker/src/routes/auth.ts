@@ -4,9 +4,9 @@ import { getPrismaClient } from '../lib/prisma';
 import { generateToken } from '../lib/jwt';
 import { hashPassword, verifyPassword } from '../lib/crypto';
 import { validate } from '../middleware/validate';
-import type { Env } from '../middleware/auth';
+import type { Env, Variables } from '../middleware/auth';
 
-const auth = new Hono<{ Bindings: Env }>();
+const auth = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // Validation schemas
 const registerSchema = z.object({
@@ -23,7 +23,7 @@ const loginSchema = z.object({
 // POST /api/auth/register
 auth.post('/register', validate(registerSchema), async (c) => {
   try {
-    const { email, password, name } = await c.req.json();
+    const { email, password, name } = c.get('requestBody') as any;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     // Check if user already exists
@@ -67,7 +67,7 @@ auth.post('/register', validate(registerSchema), async (c) => {
 // POST /api/auth/login
 auth.post('/login', validate(loginSchema), async (c) => {
   try {
-    const { email, password } = await c.req.json();
+    const { email, password } = c.get('requestBody') as any;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     // Find user

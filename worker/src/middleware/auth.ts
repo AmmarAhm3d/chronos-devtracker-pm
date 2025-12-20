@@ -9,6 +9,7 @@ export type Env = {
 
 export type Variables = {
   userId: string;
+  requestBody?: any;
 };
 
 /**

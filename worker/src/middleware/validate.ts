@@ -4,12 +4,15 @@ import { ZodSchema, ZodError } from 'zod';
 /**
  * Validation middleware for Hono
  * Validates request body against Zod schema
+ * Parses body once and stores it in context for route handlers
  */
 export const validate = (schema: ZodSchema): MiddlewareHandler => {
   return async (c: Context, next) => {
     try {
       const body = await c.req.json();
       schema.parse(body);
+      // Store parsed body for route handlers
+      c.set('requestBody', body);
       await next();
     } catch (error) {
       if (error instanceof ZodError) {
