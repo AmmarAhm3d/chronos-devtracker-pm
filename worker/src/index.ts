@@ -49,8 +49,8 @@ app.get('/api', (c) => {
       'PUT /api/projects/:id': 'Update a project (auth required)',
       'DELETE /api/projects/:id': 'Delete a project (auth required)',
       'POST /api/projects/:id/tasks': 'Create task for project (auth required)',
-      'PUT /api/tasks/:id': 'Update a task (auth required)',
-      'DELETE /api/tasks/:id': 'Delete a task (auth required)'
+      'PUT /api/tasks/:taskId': 'Update a task (auth required)',
+      'DELETE /api/tasks/:taskId': 'Delete a task (auth required)'
     }
   });
 });

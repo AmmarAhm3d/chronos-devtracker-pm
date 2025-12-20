@@ -1,15 +1,21 @@
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+};
+
 /**
- * Create a Prisma client with Accelerate extension for edge runtime
+ * Create or reuse a Prisma client with Accelerate extension for edge runtime
  */
 export function getPrismaClient(databaseUrl: string) {
-  const prisma = new PrismaClient({
-    datasourceUrl: databaseUrl,
-  }).$extends(withAccelerate());
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient({
+      datasourceUrl: databaseUrl,
+    }).$extends(withAccelerate()) as unknown as PrismaClient;
+  }
 
-  return prisma;
+  return globalForPrisma.prisma;
 }
 
 export type PrismaClientType = ReturnType<typeof getPrismaClient>;

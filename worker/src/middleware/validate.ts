@@ -10,9 +10,9 @@ export const validate = (schema: ZodSchema): MiddlewareHandler => {
   return async (c: Context, next) => {
     try {
       const body = await c.req.json();
-      schema.parse(body);
+      const parsedBody = schema.parse(body);
       // Store parsed body for route handlers
-      c.set('requestBody', body);
+      c.set('requestBody', parsedBody);
       await next();
     } catch (error) {
       if (error instanceof ZodError) {

@@ -18,7 +18,7 @@ tasks.put('/:taskId', authenticate, validate(updateTaskSchema), async (c) => {
   try {
     const userId = c.get('userId');
     const { taskId } = c.req.param();
-    const { title, priority, completed } = c.get('requestBody') as any;
+    const { title, priority, completed } = c.get('requestBody') as z.infer<typeof updateTaskSchema>;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     // Verify task exists and belongs to user's project

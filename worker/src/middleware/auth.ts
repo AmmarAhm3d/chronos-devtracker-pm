@@ -1,4 +1,4 @@
-import { Context, MiddlewareHandler } from 'hono';
+import { MiddlewareHandler } from 'hono';
 import { verifyToken } from '../lib/jwt';
 
 export type Env = {

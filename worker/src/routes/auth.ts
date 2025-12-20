@@ -23,7 +23,7 @@ const loginSchema = z.object({
 // POST /api/auth/register
 auth.post('/register', validate(registerSchema), async (c) => {
   try {
-    const { email, password, name } = c.get('requestBody') as any;
+    const { email, password, name } = c.get('requestBody') as z.infer<typeof registerSchema>;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     // Check if user already exists
@@ -67,7 +67,7 @@ auth.post('/register', validate(registerSchema), async (c) => {
 // POST /api/auth/login
 auth.post('/login', validate(loginSchema), async (c) => {
   try {
-    const { email, password } = c.get('requestBody') as any;
+    const { email, password } = c.get('requestBody') as z.infer<typeof loginSchema>;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     // Find user

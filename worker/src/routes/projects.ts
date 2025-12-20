@@ -56,7 +56,7 @@ projects.get('/', authenticate, async (c) => {
 projects.post('/', authenticate, validate(createProjectSchema), async (c) => {
   try {
     const userId = c.get('userId');
-    const { title, description, status, repoLink } = c.get('requestBody') as any;
+    const { title, description, status, repoLink } = c.get('requestBody') as z.infer<typeof createProjectSchema>;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     const project = await prisma.project.create({
@@ -122,7 +122,7 @@ projects.put('/:id', authenticate, validate(updateProjectSchema), async (c) => {
   try {
     const userId = c.get('userId');
     const { id } = c.req.param();
-    const { title, description, status, repoLink } = c.get('requestBody') as any;
+    const { title, description, status, repoLink } = c.get('requestBody') as z.infer<typeof updateProjectSchema>;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     // Check if project exists and belongs to user
@@ -191,7 +191,7 @@ projects.post('/:id/tasks', authenticate, validate(createTaskSchema), async (c) 
   try {
     const userId = c.get('userId');
     const { id } = c.req.param(); // project id
-    const { title, priority } = c.get('requestBody') as any;
+    const { title, priority } = c.get('requestBody') as z.infer<typeof createTaskSchema>;
     const prisma = getPrismaClient(c.env.DATABASE_URL);
 
     const project = await prisma.project.findUnique({ where: { id } });
