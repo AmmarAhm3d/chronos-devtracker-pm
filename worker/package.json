@@ -1,0 +1,25 @@
+{
+  "name": "chronos-devtracker-worker",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Chronos DevTracker Backend API - Cloudflare Workers + Hono + Prisma Accelerate",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "prisma:generate": "prisma generate",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "@prisma/client": "^5.20.0",
+    "@prisma/extension-accelerate": "^1.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "wrangler": "^3.84.1",
+    "prisma": "^5.20.0",
+    "typescript": "^5.6.2"
+  }
+}

@@ -1,0 +1,27 @@
+import { Context, MiddlewareHandler } from 'hono';
+import { ZodSchema, ZodError } from 'zod';
+
+/**
+ * Validation middleware for Hono
+ * Validates request body against Zod schema
+ */
+export const validate = (schema: ZodSchema): MiddlewareHandler => {
+  return async (c: Context, next) => {
+    try {
+      const body = await c.req.json();
+      schema.parse(body);
+      await next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return c.json({
+          error: 'Validation failed',
+          details: error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message,
+          })),
+        }, 400);
+      }
+      return c.json({ error: 'Invalid request body' }, 400);
+    }
+  };
+};
