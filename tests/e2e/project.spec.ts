@@ -8,13 +8,13 @@ test.describe('Project and Task CRUD', () => {
   let taskId: string;
 
   test.beforeAll(async ({ request }) => {
-    const reg = await request.post('http://localhost:3001/api/auth/register', { data: { email, password } });
+    const reg = await request.post('http://127.0.0.1:8787/api/auth/register', { data: { email, password } });
     const regJson = await reg.json();
     token = regJson.token;
   });
 
   test('create project', async ({ request }) => {
-    const resp = await request.post('http://localhost:3001/api/projects', {
+    const resp = await request.post('http://127.0.0.1:8787/api/projects', {
       headers: { Authorization: `Bearer ${token}` },
       data: { title: 'Portfolio Project', description: 'Demo project' }
     });
@@ -25,7 +25,7 @@ test.describe('Project and Task CRUD', () => {
   });
 
   test('create task', async ({ request }) => {
-    const resp = await request.post(`http://localhost:3001/api/projects/${projectId}/tasks`, {
+    const resp = await request.post(`http://127.0.0.1:8787/api/projects/${projectId}/tasks`, {
       headers: { Authorization: `Bearer ${token}` },
       data: { title: 'First Task', priority: 'HIGH' }
     });
@@ -36,7 +36,7 @@ test.describe('Project and Task CRUD', () => {
   });
 
   test('update task completion', async ({ request }) => {
-    const resp = await request.put(`http://localhost:3001/api/tasks/${taskId}`, {
+    const resp = await request.put(`http://127.0.0.1:8787/api/tasks/${taskId}`, {
       headers: { Authorization: `Bearer ${token}` },
       data: { completed: true }
     });
@@ -46,7 +46,7 @@ test.describe('Project and Task CRUD', () => {
   });
 
   test('fetch project with tasks', async ({ request }) => {
-    const resp = await request.get(`http://localhost:3001/api/projects/${projectId}`, {
+    const resp = await request.get(`http://127.0.0.1:8787/api/projects/${projectId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     expect(resp.ok()).toBeTruthy();

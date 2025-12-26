@@ -1,5 +1,6 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { Card } from './Card';
+import { AlertTriangle, RefreshCcw, Home } from 'lucide-react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -36,30 +37,38 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-8">
-          <Card title="Something went wrong">
-            <div className="text-center py-8">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+        <div className="min-h-screen bg-[#fafafa] flex items-center justify-center p-6 font-sans">
+          <Card className="max-w-md w-full border-red-100 shadow-xl" noPadding>
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600">
+                <AlertTriangle className="h-8 w-8" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">Oops! An error occurred</h3>
-              <p className="text-slate-500 text-sm mb-4 max-w-md mx-auto">
-                {this.state.error?.message || 'An unexpected error occurred. Please try again.'}
+              <h1 className="text-xl font-bold text-slate-900 mb-2">Technical Fault Detected</h1>
+              <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+                The application encountered an unexpected runtime exception. Our engineers have been notified.
               </p>
-              <div className="flex gap-3 justify-center">
+              
+              <div className="bg-slate-50 rounded-lg p-4 mb-8 text-left border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Error Trace</p>
+                <p className="text-xs font-mono text-red-600 break-all leading-tight">
+                  {this.state.error?.message || 'Unknown runtime error'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={this.handleReset}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all duration-200 text-sm"
+                  className="w-full h-11 bg-slate-900 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-slate-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                 >
-                  Try Again
+                  <RefreshCcw className="h-4 w-4" />
+                  Attempt Recovery
                 </button>
                 <button
-                  onClick={() => window.location.reload()}
-                  className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm text-sm"
+                  onClick={() => window.location.href = '/'}
+                  className="w-full h-11 bg-white text-slate-600 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
                 >
-                  Reload Page
+                  <Home className="h-4 w-4" />
+                  Return Home
                 </button>
               </div>
             </div>

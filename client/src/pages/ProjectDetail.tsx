@@ -4,12 +4,48 @@ import api from '../api/axios';
 import { Layout, Card, StatusBadge } from '../components';
 import type { Project, Task, TaskUpdateData } from '../types';
 import { CreateTaskSchema, UpdateProjectSchema, getZodFirstError } from '../lib/validation';
+import { 
+  ChevronLeft, 
+  Settings2, 
+  Trash2, 
+  ExternalLink, 
+  Github, 
+  Plus, 
+  CheckCircle2, 
+  Circle, 
+  AlertCircle,
+  Loader2,
+  Calendar,
+  LayoutGrid,
+  Hash,
+  Clock
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '../lib/utils';
 
-const PRIORITY_STYLES: Record<string, string> = {
-  HIGH: 'bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-200/50',
-  MEDIUM: 'bg-gradient-to-r from-amber-50 to-yellow-50 text-amber-700 border-amber-200/50',
-  LOW: 'bg-gradient-to-r from-slate-50 to-gray-50 text-slate-600 border-slate-200/50',
-};
+const PRIORITY_CONFIG = {
+  HIGH: {
+    label: 'High',
+    color: 'text-red-600',
+    bg: 'bg-red-50',
+    border: 'border-red-100',
+    dot: 'bg-red-500'
+  },
+  MEDIUM: {
+    label: 'Medium',
+    color: 'text-amber-600',
+    bg: 'bg-amber-50',
+    border: 'border-amber-100',
+    dot: 'bg-amber-500'
+  },
+  LOW: {
+    label: 'Low',
+    color: 'text-slate-600',
+    bg: 'bg-slate-50',
+    border: 'border-slate-100',
+    dot: 'bg-slate-500'
+  },
+} as const;
 
 const STATUS_OPTIONS = [
   { value: 'TODO', label: 'To Do' },
@@ -28,16 +64,12 @@ function ProjectDetail() {
   const [newTask, setNewTask] = useState({ title: '', priority: 'MEDIUM' as Task['priority'] });
   const [addingTask, setAddingTask] = useState(false);
   
-  // Edit project state
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ title: '', description: '', status: 'TODO' as Project['status'], repoLink: '' });
   const [saving, setSaving] = useState(false);
   
-  // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  
-  // Validation errors
   const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
@@ -62,15 +94,12 @@ function ProjectDetail() {
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.title.trim()) return;
-    
-    // Validate with Zod
     const validation = CreateTaskSchema.safeParse(newTask);
     if (!validation.success) {
       setValidationError(getZodFirstError(validation.error));
       return;
     }
     setValidationError('');
-    
     setAddingTask(true);
     try {
       const res = await api.post(`/projects/${id}/tasks`, newTask);
@@ -83,58 +112,41 @@ function ProjectDetail() {
     }
   };
 
-  // Optimistic update for tasks
   const handleUpdateTask = useCallback(async (taskId: string, updates: TaskUpdateData) => {
-    // Store previous state for rollback
     const previousTasks = [...tasks];
-    
-    // Optimistically update the UI
     setTasks(currentTasks => 
       currentTasks.map(t => (t.id === taskId ? { ...t, ...updates } : t))
     );
-    
     try {
       const res = await api.put(`/tasks/${taskId}`, updates);
-      // Update with server response to ensure consistency
       setTasks(currentTasks => 
         currentTasks.map(t => (t.id === taskId ? res.data : t))
       );
     } catch {
-      // Rollback on failure
       setTasks(previousTasks);
       setError('Failed to update task');
     }
   }, [tasks]);
 
-  // Optimistic delete for tasks
   const handleDeleteTask = useCallback(async (taskId: string) => {
-    // Store previous state for rollback
     const previousTasks = [...tasks];
-    
-    // Optimistically remove from UI
     setTasks(currentTasks => currentTasks.filter(t => t.id !== taskId));
-    
     try {
       await api.delete(`/tasks/${taskId}`);
     } catch {
-      // Rollback on failure
       setTasks(previousTasks);
       setError('Failed to delete task');
     }
   }, [tasks]);
 
-  // Handle project update
   const handleUpdateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate with Zod
     const validation = UpdateProjectSchema.safeParse(editForm);
     if (!validation.success) {
       setValidationError(getZodFirstError(validation.error));
       return;
     }
     setValidationError('');
-    
     setSaving(true);
     try {
       const res = await api.put(`/projects/${id}`, {
@@ -152,7 +164,6 @@ function ProjectDetail() {
     }
   };
 
-  // Handle project delete
   const handleDeleteProject = async () => {
     setDeleting(true);
     try {
@@ -171,365 +182,416 @@ function ProjectDetail() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center py-20">
-          <svg className="animate-spin h-10 w-10 text-indigo-500" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-          </svg>
+        <div className="flex h-[60vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
         </div>
       </Layout>
     );
   }
 
-  if (error && !project) {
-    return (
-      <Layout>
-        <Card title="Error">
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p className="text-red-600 font-medium">{error}</p>
-            <button onClick={() => navigate('/')} className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm mt-4">
-              Back to Dashboard
-            </button>
-          </div>
-        </Card>
-      </Layout>
-    );
-  }
-
-  if (!project) {
-    return (
-      <Layout>
-        <Card title="Not Found">
-          <div className="text-center py-8">
-            <p className="text-slate-600">Project not found</p>
-            <button onClick={() => navigate('/')} className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm mt-4">
-              Back to Dashboard
-            </button>
-          </div>
-        </Card>
-      </Layout>
-    );
-  }
+  if (!project) return null;
 
   return (
     <Layout>
-      <div className="space-y-6">
-        {/* Back Button */}
-        <button 
-          onClick={() => navigate('/')} 
-          className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm inline-flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Dashboard
-        </button>
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Delete Project?</h3>
-                <p className="text-slate-500 text-sm mb-6">
-                  Are you sure you want to delete "{project?.title ?? 'this project'}"? This will also delete all {tasks.length} task{tasks.length !== 1 ? 's' : ''} and cannot be undone.
-                </p>
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={() => setShowDeleteConfirm(false)}
-                    disabled={deleting}
-                    className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm text-sm disabled:opacity-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteProject}
-                    disabled={deleting}
-                    className="bg-gradient-to-r from-red-500 to-rose-500 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 hover:from-red-400 hover:to-rose-400 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
-                  >
-                    {deleting ? 'Deleting...' : 'Delete Project'}
-                  </button>
-                </div>
-              </div>
-            </div>
+      <div className="space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <button 
+            onClick={() => navigate('/')} 
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Back to Dashboard
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={cn(
+                "inline-flex h-9 items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950",
+                isEditing ? "bg-slate-100 border-slate-200 text-slate-900" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+              )}
+            >
+              <Settings2 className="h-4 w-4" />
+              Settings
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-red-100 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 hover:border-red-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-950"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </button>
           </div>
+        </div>
+
+        {/* Error Feedback */}
+        {(error || validationError) && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 p-4 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm font-medium shadow-sm"
+          >
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            {validationError || error}
+          </motion.div>
         )}
 
-        {/* Project Header */}
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-2xl p-8 text-white shadow-xl shadow-indigo-500/30">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="space-y-3 flex-1">
-              {!isEditing ? (
-                <>
-                  <div className="flex items-start justify-between gap-4">
-                    <h1 className="text-3xl font-bold">{project.title}</h1>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-3 rounded-lg backdrop-blur-sm transition-all duration-200 text-sm flex items-center gap-1.5"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="bg-red-500/80 hover:bg-red-500 text-white font-medium py-2 px-3 rounded-lg transition-all duration-200 text-sm flex items-center gap-1.5"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
-                      </button>
-                    </div>
-                  </div>
+        <Card className="p-0 border-slate-900/5 shadow-md">
+          <div className="relative">
+            <div className="h-32 bg-slate-900 overflow-hidden relative">
+               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            </div>
+            
+            <div className="px-8 pb-8 -mt-6 relative">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div className="space-y-4 flex-1">
                   <div className="flex items-center gap-3">
-                    <StatusBadge status={project.status} />
-                    {project.repoLink && (
-                      <a 
-                        href={project.repoLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors"
-                      >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                        </svg>
-                        Repository
-                      </a>
-                    )}
-                  </div>
-                  {project.description && (
-                    <p className="text-white/80 max-w-2xl">{project.description}</p>
-                  )}
-                </>
-              ) : (
-                <form onSubmit={handleUpdateProject} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-1.5">Title</label>
-                    <input
-                      type="text"
-                      value={editForm.title}
-                      onChange={e => setEditForm({ ...editForm, title: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
-                      placeholder="Project title"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-white/80 mb-1.5">Description</label>
-                    <textarea
-                      value={editForm.description}
-                      onChange={e => setEditForm({ ...editForm, description: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200 resize-none"
-                      placeholder="Project description (optional)"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/80 mb-1.5">Status</label>
-                      <select
-                        value={editForm.status}
-                        onChange={e => setEditForm({ ...editForm, status: e.target.value as Project['status'] })}
-                        className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
-                      >
-                        {STATUS_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value} className="text-slate-800">{opt.label}</option>
-                        ))}
-                      </select>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-lg border border-slate-100 text-slate-900">
+                      <LayoutGrid className="h-6 w-6" />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/80 mb-1.5">Repository Link</label>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{project.title}</h1>
+                        <StatusBadge status={project.status} />
+                      </div>
+                      <div className="flex items-center gap-4">
+                         <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-tight">
+                           <Hash className="h-3 w-3" />
+                           ID: {project.id.slice(0, 8)}
+                         </div>
+                         {project.repoLink && (
+                           <a 
+                             href={project.repoLink} 
+                             target="_blank" 
+                             rel="noopener noreferrer" 
+                             className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                           >
+                             <Github className="h-3.5 w-3.5" />
+                             View Repository
+                             <ExternalLink className="h-3 w-3" />
+                           </a>
+                         )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4 bg-slate-50 rounded-xl p-3 border border-slate-200">
+                  <div className="relative h-12 w-12">
+                    <svg className="h-12 w-12 transform -rotate-90">
+                      <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-200" />
+                      <circle 
+                        cx="24" 
+                        cy="24" 
+                        r="20" 
+                        stroke="currentColor" 
+                        strokeWidth="4" 
+                        fill="transparent" 
+                        strokeDasharray={125.6} 
+                        strokeDashoffset={125.6 * (1 - taskProgress / 100)} 
+                        strokeLinecap="round" 
+                        className="text-slate-900 transition-all duration-1000" 
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">
+                      {taskProgress}%
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Project Progress</p>
+                    <p className="text-xs font-bold text-slate-900">{completedTasks} of {tasks.length} requirements met</p>
+                  </div>
+                </div>
+              </div>
+
+              {project.description && !isEditing && (
+                <div className="mt-6 text-sm text-slate-600 leading-relaxed max-w-3xl">
+                  {project.description}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {isEditing && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden border-t border-slate-100"
+              >
+                <div className="p-8 bg-slate-50/50">
+                  <form onSubmit={handleUpdateProject} className="space-y-6 max-w-2xl">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Project Title</label>
+                        <input
+                          type="text"
+                          value={editForm.title}
+                          onChange={e => setEditForm({ ...editForm, title: e.target.value })}
+                          className="w-full px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-950/5"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Current Status</label>
+                        <select
+                          value={editForm.status}
+                          onChange={e => setEditForm({ ...editForm, status: e.target.value as Project['status'] })}
+                          className="w-full px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-950/5"
+                        >
+                          {STATUS_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Technical Overview</label>
+                      <textarea
+                        value={editForm.description}
+                        onChange={e => setEditForm({ ...editForm, description: e.target.value })}
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-950/5 min-h-[100px]"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-700 uppercase tracking-tight">Repository Link</label>
                       <input
                         type="url"
                         value={editForm.repoLink}
                         onChange={e => setEditForm({ ...editForm, repoLink: e.target.value })}
-                        className="w-full px-4 py-3 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm placeholder:text-white/40 text-white focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/40 transition-all duration-200"
-                        placeholder="https://github.com/..."
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-950/5"
+                        placeholder="https://github.com/org/repo"
                       />
                     </div>
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="bg-white text-indigo-600 font-medium py-2 px-4 rounded-lg shadow-lg hover:bg-white/90 active:scale-[0.98] transition-all duration-200 text-sm disabled:opacity-50"
-                    >
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditForm({
-                          title: project.title || '',
-                          description: project.description || '',
-                          status: project.status || 'TODO',
-                          repoLink: project.repoLink || '',
-                        });
-                        setValidationError('');
-                      }}
-                      className="bg-white/20 hover:bg-white/30 text-white font-medium py-2 px-4 rounded-lg backdrop-blur-sm transition-all duration-200 text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-            
-            {/* Progress Ring */}
-            <div className="flex items-center gap-4 bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="relative w-20 h-20">
-                <svg className="w-20 h-20 transform -rotate-90">
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="35"
-                    stroke="rgba(255,255,255,0.2)"
-                    strokeWidth="6"
-                    fill="none"
-                  />
-                  <circle
-                    cx="40"
-                    cy="40"
-                    r="35"
-                    stroke="white"
-                    strokeWidth="6"
-                    fill="none"
-                    strokeDasharray={`${taskProgress * 2.2} 220`}
-                    strokeLinecap="round"
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xl font-bold">{taskProgress}%</span>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="rounded-md bg-slate-900 px-6 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+                      >
+                        {saving ? 'Syncing...' : 'Save Changes'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(false)}
+                        className="px-6 py-2 text-xs font-bold text-slate-600 hover:text-slate-900"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Requirements & Tasks</h2>
+              <div className="flex items-center gap-4 text-xs font-medium text-slate-400">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  {completedTasks} Done
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Circle className="h-3.5 w-3.5" />
+                  {tasks.length - completedTasks} Pending
+                </span>
               </div>
-              <div>
-                <p className="text-white/60 text-sm">Task Progress</p>
-                <p className="font-semibold">{completedTasks} of {tasks.length} done</p>
+            </div>
+
+            <Card className="p-0 border-slate-200">
+              <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+                <form onSubmit={handleAddTask} className="flex gap-3">
+                  <input
+                    type="text"
+                    placeholder="Add a new requirement..."
+                    value={newTask.title}
+                    onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+                    className="flex-1 px-3 py-2 text-sm bg-transparent border-none focus:ring-0 focus:outline-none"
+                    required
+                  />
+                  <select
+                    value={newTask.priority}
+                    onChange={e => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
+                    className="text-xs font-bold border border-slate-200 rounded-md px-2 py-1 bg-white focus:outline-none"
+                  >
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                  </select>
+                  <button 
+                    type="submit" 
+                    disabled={addingTask}
+                    className="h-8 w-8 flex items-center justify-center rounded-md bg-slate-900 text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </form>
               </div>
+
+              <div className="divide-y divide-slate-100">
+                {tasks.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <AlertCircle className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-slate-400">No tasks defined for this project.</p>
+                  </div>
+                ) : (
+                  tasks.map((task) => (
+                    <TaskItem 
+                      key={task.id} 
+                      task={task} 
+                      onToggle={(completed) => handleUpdateTask(task.id, { completed })}
+                      onDelete={() => handleDeleteTask(task.id)}
+                    />
+                  ))
+                )}
+              </div>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-4 space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Details</h2>
+              <Card className="p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    <Calendar className="h-3.5 w-3.5" />
+                    Created
+                  </div>
+                  <span className="text-xs font-bold text-slate-900">
+                    {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    <Clock className="h-3.5 w-3.5" />
+                    Last Updated
+                  </div>
+                  <span className="text-xs font-bold text-slate-900">
+                    {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'N/A'}
+                  </span>
+                </div>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400">Team</h2>
+              <Card className="p-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                    ME
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">You (Owner)</p>
+                    <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">Primary Maintainer</p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Error Message */}
-        {(error || validationError) && (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
-            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-            {validationError || error}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-slate-950/20 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-sm overflow-hidden rounded-xl bg-white p-6 shadow-2xl border border-slate-100"
+            >
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+                  <AlertCircle className="h-6 w-6" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Permanent Deletion</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  This action will destroy all data associated with <span className="font-bold text-slate-900">"{project.title}"</span>. This is irreversible.
+                </p>
+              </div>
+              <div className="mt-6 flex flex-col gap-2">
+                <button
+                  disabled={deleting}
+                  onClick={handleDeleteProject}
+                  className="inline-flex h-10 w-full items-center justify-center rounded-md bg-red-600 text-sm font-bold text-white shadow-sm transition-colors hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleting ? 'Deleting...' : 'Confirm Destruction'}
+                </button>
+                <button
+                  disabled={deleting}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="inline-flex h-10 w-full items-center justify-center rounded-md border border-slate-200 bg-white text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
           </div>
         )}
-
-        {/* Tasks Section */}
-        <Card title="Tasks">
-          {/* Add Task Form */}
-          <form onSubmit={handleAddTask} className="flex flex-wrap gap-3 items-end pb-6 border-b border-slate-100">
-            <div className="flex-1 min-w-[200px]">
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">New Task</label>
-              <input
-                type="text"
-                placeholder="What needs to be done?"
-                value={newTask.title}
-                onChange={e => setNewTask({ ...newTask, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
-                required
-              />
-            </div>
-            <div className="w-36">
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Priority</label>
-              <select
-                value={newTask.priority}
-                onChange={e => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
-              >
-                <option value="HIGH">🔴 High</option>
-                <option value="MEDIUM">🟡 Medium</option>
-                <option value="LOW">⚪ Low</option>
-              </select>
-            </div>
-            <button 
-              type="submit" 
-              disabled={addingTask}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-50"
-            >
-              {addingTask ? 'Adding...' : 'Add Task'}
-            </button>
-          </form>
-
-          {/* Task List */}
-          {tasks.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <p className="text-slate-600 font-medium">No tasks yet</p>
-              <p className="text-sm text-slate-400 mt-1">Add your first task above</p>
-            </div>
-          ) : (
-            <ul className="divide-y divide-slate-100">
-              {tasks.map(task => (
-                <li 
-                  key={task.id} 
-                  className={`py-4 flex items-center justify-between gap-4 group transition-all duration-200 ${task.completed ? 'opacity-60' : ''}`}
-                >
-                  <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <button
-                      onClick={() => handleUpdateTask(task.id, { completed: !task.completed })}
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
-                        task.completed 
-                          ? 'bg-emerald-500 border-emerald-500 text-white' 
-                          : 'border-slate-300 hover:border-indigo-500'
-                      }`}
-                    >
-                      {task.completed && (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </button>
-                    <div className="min-w-0">
-                      <p className={`font-medium text-slate-800 truncate ${task.completed ? 'line-through text-slate-400' : ''}`}>
-                        {task.title}
-                      </p>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium border mt-1 ${PRIORITY_STYLES[task.priority]}`}>
-                        {task.priority === 'HIGH' && '🔴'}
-                        {task.priority === 'MEDIUM' && '🟡'}
-                        {task.priority === 'LOW' && '⚪'}
-                        {task.priority}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 bg-gradient-to-r from-red-500 to-rose-500 text-white font-medium rounded-lg shadow-md shadow-red-500/25 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98] transition-all duration-200 text-xs py-1.5 px-3"
-                  >
-                    Delete
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      </div>
+      </AnimatePresence>
     </Layout>
+  );
+}
+
+function TaskItem({ task, onToggle, onDelete }: { task: Task; onToggle: (c: boolean) => void; onDelete: () => void }) {
+  const priority = PRIORITY_CONFIG[task.priority as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG.MEDIUM;
+
+  return (
+    <div className={cn(
+      "group flex items-center justify-between p-4 transition-all hover:bg-slate-50/50",
+      task.completed && "bg-slate-50/30"
+    )}>
+      <div className="flex items-center gap-4 min-w-0">
+        <button
+          onClick={() => onToggle(!task.completed)}
+          className={cn(
+            "flex h-5 w-5 items-center justify-center rounded border transition-all duration-200",
+            task.completed 
+              ? "bg-slate-900 border-slate-900 text-white" 
+              : "border-slate-300 hover:border-slate-900 bg-white"
+          )}
+        >
+          {task.completed && <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={3} />}
+        </button>
+        <div className="flex flex-col min-w-0">
+          <span className={cn(
+            "text-sm font-medium transition-all duration-300 truncate",
+            task.completed ? "text-slate-400 line-through" : "text-slate-900"
+          )}>
+            {task.title}
+          </span>
+          <div className="flex items-center gap-3 mt-0.5">
+            <div className={cn(
+              "flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-tight",
+              priority.color, priority.bg
+            )}>
+              <div className={cn("h-1.5 w-1.5 rounded-full", priority.dot)} />
+              {priority.label}
+            </div>
+            {task.completed && (
+              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">Verified</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <button 
+        onClick={onDelete}
+        className="opacity-0 group-hover:opacity-100 h-8 w-8 flex items-center justify-center rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
