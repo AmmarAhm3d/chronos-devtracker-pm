@@ -70,19 +70,33 @@ Portfolio-ready full-stack project management application showcasing TypeScript 
 - Node.js >= 18 (Codespaces provides v22)
 - Docker (for PostgreSQL)
 
-## Environment Variables (`.env`)
+## Environment Variables
+
+### Root `.env` (for backend)
+Create a `.env` file in the repository root:
 ```env
 DATABASE_URL="postgresql://chronos:devpassword@localhost:5432/chronos_dev"
 JWT_SECRET="<secure-random>"
 JWT_EXPIRES_IN="7d"
 PORT=3001
 NODE_ENV="development"
-VITE_API_URL="http://localhost:3001/api"
 ```
+
+### Client `.env` (for frontend)
+Create a `client/.env` file:
+```env
+VITE_API_URL=http://localhost:3001/api
+```
+
+**Note**: Both `.env` files are gitignored. The client `.env` is required for Vite to properly configure the API endpoint.
 
 ## Setup
 ```bash
 # Clone & enter project (in Codespaces already)
+
+# Create .env files from example
+cp .env.example .env
+echo "VITE_API_URL=http://localhost:3001/api" > client/.env
 
 # Start database
 docker-compose up -d
