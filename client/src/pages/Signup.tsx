@@ -42,7 +42,7 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-terminal-bg flex items-center justify-center p-4">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
@@ -59,7 +59,7 @@ function Signup() {
         </div>
 
         {/* Signup Card */}
-        <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-8">
+        <div className="bg-terminal-surface border-2 border-terminal-cyan/30 p-8">
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Create account</h2>
           <p className="text-slate-500 text-sm mb-6">Start tracking your portfolio projects</p>
           

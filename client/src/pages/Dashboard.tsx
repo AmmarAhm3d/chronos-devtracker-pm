@@ -7,9 +7,9 @@ import type { Project } from '../types';
 import { CreateProjectSchema, getZodFirstError } from '../lib/validation';
 
 const STATUS_COLORS: Record<string, string> = {
-  TODO: '#f59e0b',
-  IN_PROGRESS: '#6366f1',
-  COMPLETE: '#10b981',
+  TODO: '#ff6b35',
+  IN_PROGRESS: '#00ffff',
+  COMPLETE: '#00ff41',
   ON_HOLD: '#64748b',
 };
 
@@ -79,47 +79,66 @@ function Dashboard() {
 
   return (
     <Layout>
-      {/* Stats Overview */}
+      {/* Stats Overview - Terminal Style */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg shadow-indigo-500/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-indigo-100 text-sm font-medium">Total Projects</p>
-              <p className="text-4xl font-bold mt-1">{totalProjects}</p>
+        <div className="relative bg-terminal-surface border-2 border-terminal-cyan/30 p-6 overflow-hidden group hover:border-terminal-cyan/60 transition-all duration-300">
+          <div className="absolute inset-0 bg-terminal-grid opacity-50"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-cyan animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-cyan animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-3">
+              <div className="font-mono text-xs text-terminal-cyan/70 tracking-wider uppercase">
+                [TOTAL_PROJECTS]
+              </div>
+              <div className="w-8 h-8 border border-terminal-cyan/30 flex items-center justify-center text-terminal-cyan group-hover:animate-glow-pulse transition-all">
+                <span className="font-mono text-lg">█</span>
+              </div>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+            <div className="font-mono text-5xl font-bold text-terminal-cyan mt-2 group-hover:text-glow transition-all">
+              {totalProjects.toString().padStart(2, '0')}
             </div>
+            <div className="mt-2 h-0.5 bg-terminal-cyan/20 group-hover:bg-terminal-cyan/40 transition-all"></div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg shadow-emerald-500/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-100 text-sm font-medium">Completed</p>
-              <p className="text-4xl font-bold mt-1">{completedProjects}</p>
+        <div className="relative bg-terminal-surface border-2 border-terminal-lime/30 p-6 overflow-hidden group hover:border-terminal-lime/60 transition-all duration-300">
+          <div className="absolute inset-0 bg-terminal-grid opacity-50"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-lime animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-lime animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-3">
+              <div className="font-mono text-xs text-terminal-lime/70 tracking-wider uppercase">
+                [COMPLETED]
+              </div>
+              <div className="w-8 h-8 border border-terminal-lime/30 flex items-center justify-center text-terminal-lime group-hover:animate-glow-pulse transition-all">
+                <span className="font-mono text-lg">✓</span>
+              </div>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div className="font-mono text-5xl font-bold text-terminal-lime mt-2 group-hover:text-glow transition-all">
+              {completedProjects.toString().padStart(2, '0')}
             </div>
+            <div className="mt-2 h-0.5 bg-terminal-lime/20 group-hover:bg-terminal-lime/40 transition-all"></div>
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg shadow-amber-500/30">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-amber-100 text-sm font-medium">Completion Rate</p>
-              <p className="text-4xl font-bold mt-1">{completionRate}%</p>
+        <div className="relative bg-terminal-surface border-2 border-terminal-orange/30 p-6 overflow-hidden group hover:border-terminal-orange/60 transition-all duration-300">
+          <div className="absolute inset-0 bg-terminal-grid opacity-50"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-orange animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-orange animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="relative z-10">
+            <div className="flex items-start justify-between mb-3">
+              <div className="font-mono text-xs text-terminal-orange/70 tracking-wider uppercase">
+                [COMPLETION_RATE]
+              </div>
+              <div className="w-8 h-8 border border-terminal-orange/30 flex items-center justify-center text-terminal-orange group-hover:animate-glow-pulse transition-all">
+                <span className="font-mono text-lg">%</span>
+              </div>
             </div>
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
+            <div className="font-mono text-5xl font-bold text-terminal-orange mt-2 group-hover:text-glow transition-all">
+              {completionRate.toString().padStart(2, '0')}
+              <span className="text-2xl ml-1">%</span>
             </div>
+            <div className="mt-2 h-0.5 bg-terminal-orange/20 group-hover:bg-terminal-orange/40 transition-all"></div>
           </div>
         </div>
       </div>
@@ -130,13 +149,11 @@ function Dashboard() {
           {statusSummary.length === 0 ? (
             <div className="h-64 flex items-center justify-center">
               <div className="text-center">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                <div className="font-mono text-5xl text-terminal-gray-700 mb-4">
+                  ◯
                 </div>
-                <p className="text-sm text-slate-500">No projects yet</p>
-                <p className="text-xs text-slate-400 mt-1">Create your first project to see stats</p>
+                <p className="font-mono text-xs text-terminal-gray-500 tracking-wide">NO_DATA_AVAILABLE</p>
+                <p className="font-mono text-[10px] text-terminal-gray-600 mt-1">CREATE_PROJECTS_TO_POPULATE</p>
               </div>
             </div>
           ) : (
@@ -185,58 +202,56 @@ function Dashboard() {
             actions={
               <button 
                 onClick={() => setShowNewProject(!showNewProject)} 
-                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all duration-200 text-sm"
+                className="border-2 border-terminal-lime/50 text-terminal-lime font-mono text-xs py-2 px-4 hover:bg-terminal-lime/10 hover:border-terminal-lime active:scale-95 transition-all duration-200 tracking-wider uppercase"
               >
                 <span className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  New Project
+                  <span>+</span>
+                  NEW_PROJECT
                 </span>
               </button>
             }
           >
             {/* New Project Form */}
             {showNewProject && (
-              <form onSubmit={handleCreateProject} className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 mb-4">
-                <h3 className="font-semibold text-slate-800 mb-4">Create New Project</h3>
+              <form onSubmit={handleCreateProject} className="p-4 bg-terminal-surface border-2 border-terminal-lime/30 mb-4">
+                <h3 className="font-mono text-sm font-semibold text-terminal-lime mb-4 tracking-wide uppercase">{'>'} CREATE_NEW_PROJECT</h3>
                 <div className="space-y-4">
                   <input
                     type="text"
-                    placeholder="Project title"
+                    placeholder="PROJECT_TITLE..."
                     value={newProject.title}
                     onChange={e => setNewProject({ ...newProject, title: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border-2 border-terminal-gray-700 bg-terminal-bg placeholder:text-terminal-gray-600 text-terminal-cyan font-mono text-sm focus:outline-none focus:border-terminal-cyan transition-all duration-200"
                     required
                   />
                   <textarea
-                    placeholder="Description (optional)"
+                    placeholder="DESCRIPTION (OPTIONAL)..."
                     value={newProject.description}
                     onChange={e => setNewProject({ ...newProject, description: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200 resize-none"
+                    className="w-full px-4 py-3 border-2 border-terminal-gray-700 bg-terminal-bg placeholder:text-terminal-gray-600 text-terminal-gray-300 font-mono text-sm focus:outline-none focus:border-terminal-cyan transition-all duration-200 resize-none"
                     rows={2}
                   />
                   <select
                     value={newProject.status}
                     onChange={e => setNewProject({ ...newProject, status: e.target.value as Project['status'] })}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border-2 border-terminal-gray-700 bg-terminal-bg text-terminal-cyan font-mono text-sm focus:outline-none focus:border-terminal-cyan transition-all duration-200"
                   >
-                    <option value="TODO">To Do</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="COMPLETE">Complete</option>
-                    <option value="ON_HOLD">On Hold</option>
+                    <option value="TODO">TODO</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="COMPLETE">COMPLETE</option>
+                    <option value="ON_HOLD">ON_HOLD</option>
                   </select>
                   {validationError && (
-                    <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
-                      {validationError}
+                    <div className="p-3 border-2 border-terminal-orange/50 bg-terminal-orange/10 text-terminal-orange font-mono text-xs">
+                      {'>'} ERROR: {validationError}
                     </div>
                   )}
                   <div className="flex gap-2">
-                    <button type="submit" disabled={creating} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-2 px-4 rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all duration-200 text-sm">
-                      {creating ? 'Creating...' : 'Create Project'}
+                    <button type="submit" disabled={creating} className="border-2 border-terminal-lime/50 text-terminal-lime font-mono text-xs py-2 px-4 hover:bg-terminal-lime/10 hover:border-terminal-lime active:scale-95 transition-all duration-200 tracking-wider uppercase disabled:opacity-50 disabled:cursor-not-allowed">
+                      {creating ? 'CREATING...' : 'CREATE'}
                     </button>
-                    <button type="button" onClick={() => { setShowNewProject(false); setValidationError(''); }} className="bg-white text-slate-700 font-medium py-2 px-4 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98] transition-all duration-200 shadow-sm text-sm">
-                      Cancel
+                    <button type="button" onClick={() => { setShowNewProject(false); setValidationError(''); }} className="border-2 border-terminal-gray-700 text-terminal-gray-400 font-mono text-xs py-2 px-4 hover:bg-terminal-gray-800 hover:border-terminal-gray-600 active:scale-95 transition-all duration-200 tracking-wider uppercase">
+                      CANCEL
                     </button>
                   </div>
                 </div>
@@ -245,69 +260,62 @@ function Dashboard() {
 
             {loading && (
               <div className="flex items-center justify-center py-12">
-                <svg className="animate-spin h-8 w-8 text-indigo-500" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
+                <div className="font-mono text-terminal-cyan animate-pulse">
+                  <span className="text-2xl">▓▓▓</span> LOADING<span className="terminal-cursor"></span>
+                </div>
               </div>
             )}
             
             {error && (
-              <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
-                {error}
+              <div className="p-4 border-2 border-terminal-orange/50 bg-terminal-orange/10 font-mono text-xs text-terminal-orange">
+                {'>'} ERROR: {error}
               </div>
             )}
             
             {!loading && !error && projects.length === 0 && (
               <div className="text-center py-12">
-                <div className="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
+                <div className="font-mono text-6xl text-terminal-gray-700 mb-4">
+                  ▢
                 </div>
-                <p className="text-slate-600 font-medium">No projects yet</p>
-                <p className="text-sm text-slate-400 mt-1">Click "New Project" to get started</p>
+                <p className="font-mono text-sm text-terminal-gray-500 tracking-wide">NO_PROJECTS_FOUND</p>
+                <p className="font-mono text-xs text-terminal-gray-600 mt-2">EXECUTE "NEW_PROJECT" TO BEGIN</p>
               </div>
             )}
             
             {!loading && !error && projects.length > 0 && (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-terminal-gray-800">
                 {projects.map(project => (
                   <li 
                     key={project.id} 
-                    className="py-4 flex items-start justify-between gap-4 cursor-pointer group hover:bg-slate-50 -mx-6 px-6 transition-colors rounded-lg" 
+                    className="py-4 flex items-start justify-between gap-4 cursor-pointer group hover:bg-terminal-bg/50 -mx-6 px-6 transition-colors border-l-2 border-transparent hover:border-terminal-cyan" 
                     onClick={() => navigate(`/projects/${project.id}`)}
                   >
                     <div className="space-y-2 flex-1 min-w-0">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:from-indigo-200 group-hover:to-purple-200 transition-colors">
-                          <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                          </svg>
+                        <div className="w-10 h-10 border-2 border-terminal-cyan/30 flex items-center justify-center flex-shrink-0 group-hover:border-terminal-cyan transition-colors font-mono text-terminal-cyan">
+                          ▣
                         </div>
                         <div className="min-w-0">
-                          <h3 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors truncate">
+                          <h3 className="font-mono text-sm font-semibold text-terminal-gray-200 group-hover:text-terminal-cyan transition-colors truncate">
                             {project.title}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <StatusBadge status={project.status} />
                             {(project._count?.tasks ?? 0) > 0 && (
-                              <span className="text-xs text-slate-400">
-                                {project._count?.tasks ?? 0} task{(project._count?.tasks ?? 0) !== 1 ? 's' : ''}
+                              <span className="font-mono text-[10px] text-terminal-gray-600 tracking-wider">
+                                [{project._count?.tasks ?? 0}_TASK{(project._count?.tasks ?? 0) !== 1 ? 'S' : ''}]
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
                       {project.description && (
-                        <p className="text-sm text-slate-500 line-clamp-2 ml-12">
-                          {project.description}
-                        </p>
+                        <p className="text-xs text-terminal-gray-500 line-clamp-2 ml-12 font-mono">{project.description}</p>
                       )}
                     </div>
-                    <svg className="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition-colors flex-shrink-0 mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    <div className="font-mono text-terminal-cyan/50 group-hover:text-terminal-cyan transition-colors flex-shrink-0 mt-2 text-lg">
+                      →
+                    </div>
                   </li>
                 ))}
               </ul>
