@@ -2,6 +2,7 @@
   "name": "chronos-devtracker",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Portfolio Project Management Application - Full-stack TypeScript CRUD app with React, Express, PostgreSQL",
   "workspaces": [
     "client",
@@ -10,6 +11,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w server && npm run build -w client",
+    "start": "npm run start -w server",
     "test": "npm run test -w server && npm run test -w client",
     "test:e2e": "playwright test",
     "docker:up": "docker-compose up -d",
