@@ -42,106 +42,111 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-terminal-bg flex items-center justify-center p-4">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-      </div>
+    <div className="min-h-screen bg-terminal-bg flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Terminal grid background */}
+      <div className="absolute inset-0 bg-terminal-grid opacity-20"></div>
       
-      <div className="relative w-full max-w-md">
+      {/* Animated scanlines */}
+      <div className="absolute inset-0 bg-scanlines opacity-10"></div>
+      
+      {/* Corner accents */}
+      <div className="absolute top-0 left-0 w-32 h-32 border-t-2 border-l-2 border-terminal-lime/20"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-terminal-orange/20"></div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 border-b-2 border-l-2 border-terminal-cyan/20"></div>
+      <div className="absolute bottom-0 right-0 w-32 h-32 border-b-2 border-r-2 border-terminal-lime/20"></div>
+      
+      <div className="relative w-full max-w-md z-10">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Chronos <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">DevTracker</span>
+          <h1 className="font-mono text-3xl font-bold text-terminal-lime mb-2 tracking-wider">
+            CHRONOS_<span className="text-terminal-cyan">DEVTRACKER</span>
           </h1>
-          <p className="text-slate-400 text-sm">Portfolio Project Management</p>
+          <p className="font-mono text-xs text-terminal-gray-500 tracking-widest">PORTFOLIO_PROJECT_MANAGEMENT</p>
         </div>
 
         {/* Signup Card */}
-        <div className="bg-terminal-surface border-2 border-terminal-cyan/30 p-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Create account</h2>
-          <p className="text-slate-500 text-sm mb-6">Start tracking your portfolio projects</p>
+        <div className="bg-terminal-surface border-2 border-terminal-lime/30 p-8 relative">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terminal-lime/50 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-terminal-lime/50 to-transparent"></div>
+          
+          <h2 className="font-mono text-xl font-bold text-terminal-lime mb-1 tracking-wide uppercase">{'>'} CREATE_ACCOUNT</h2>
+          <p className="font-mono text-xs text-terminal-gray-500 mb-6 tracking-wide">REGISTER_TO_START_TRACKING</p>
           
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
-              <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              {error}
+            <div className="mb-6 p-4 border-2 border-terminal-orange/50 bg-terminal-orange/10 font-mono text-xs text-terminal-orange flex items-center gap-2">
+              <span className="text-lg">⚠</span>
+              <span>{'>'} ERROR: {error}</span>
             </div>
           )}
           
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1.5">
-                Full name
+              <label htmlFor="name" className="block font-mono text-xs font-medium text-terminal-lime mb-2 tracking-wider uppercase">
+                FULL_NAME
               </label>
               <input
                 id="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder="JOHN_DOE"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-terminal-gray-700 bg-terminal-bg text-terminal-cyan font-mono text-sm placeholder:text-terminal-gray-600 focus:outline-none focus:border-terminal-lime transition-all"
                 autoComplete="name"
               />
             </div>
             
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
-                Email address
+              <label htmlFor="email" className="block font-mono text-xs font-medium text-terminal-lime mb-2 tracking-wider uppercase">
+                EMAIL_ADDRESS
               </label>
               <input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="user@domain.tld"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-terminal-gray-700 bg-terminal-bg text-terminal-cyan font-mono text-sm placeholder:text-terminal-gray-600 focus:outline-none focus:border-terminal-lime transition-all"
                 required
                 autoComplete="email"
               />
             </div>
             
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1.5">
-                Password
+              <label htmlFor="password" className="block font-mono text-xs font-medium text-terminal-lime mb-2 tracking-wider uppercase">
+                PASSWORD
               </label>
               <input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 bg-white placeholder:text-slate-400 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-terminal-gray-700 bg-terminal-bg text-terminal-cyan font-mono text-sm placeholder:text-terminal-gray-600 focus:outline-none focus:border-terminal-lime transition-all"
                 required
                 autoComplete="new-password"
               />
-              <p className="mt-1.5 text-xs text-slate-400">Must be at least 6 characters</p>
+              <p className="mt-1.5 font-mono text-[10px] text-terminal-gray-600 tracking-wide">MIN_LENGTH: 6_CHARS</p>
             </div>
             
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium py-2.5 px-5 rounded-lg shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full border-2 border-terminal-lime/50 bg-terminal-lime/5 text-terminal-lime font-mono text-sm py-3 px-5 hover:bg-terminal-lime/10 hover:border-terminal-lime active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed tracking-wider uppercase"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Creating account...
+                  <span className="animate-pulse">▓▓▓</span> REGISTERING<span className="terminal-cursor"></span>
                 </span>
-              ) : 'Create account'}
+              ) : (
+                <span>{'>'} CREATE_ACCOUNT</span>
+              )}
             </button>
           </form>
           
-          <div className="mt-6 text-center">
-            <span className="text-slate-500 text-sm">Already have an account? </span>
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-500 font-medium text-sm transition-colors">
-              Sign in
+          <div className="mt-6 text-center border-t-2 border-terminal-gray-800 pt-6">
+            <span className="font-mono text-xs text-terminal-gray-500 tracking-wide">HAVE_ACCOUNT? </span>
+            <Link to="/login" className="font-mono text-xs text-terminal-cyan hover:text-terminal-lime transition-colors tracking-wide uppercase">
+              SIGN_IN
             </Link>
           </div>
         </div>
