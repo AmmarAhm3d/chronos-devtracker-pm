@@ -15,7 +15,13 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Root route - API info
+/**
+ * Root endpoint - API information
+ * Returns basic API metadata and available endpoints for discovery.
+ * Added to fix Render deployment routing issues.
+ * @route GET /
+ * @returns {object} API name, version, description, and endpoint list
+ */
 app.get('/', (_req, res) => {
   res.json({
     name: 'Chronos DevTracker API',
@@ -35,7 +41,14 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API info route
+/**
+ * API info endpoint - Detailed route documentation
+ * Returns comprehensive list of all available API routes with descriptions.
+ * Useful for API consumers to understand authentication requirements.
+ * Added to fix Render deployment routing issues.
+ * @route GET /api
+ * @returns {object} API message, version, and detailed route descriptions
+ */
 app.get('/api', (_req, res) => {
   res.json({
     message: 'Welcome to Chronos DevTracker API',

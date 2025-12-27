@@ -8,11 +8,11 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-terminal-bg flex flex-col relative overflow-hidden">
       {/* Terminal grid background */}
-      <div className="fixed inset-0 bg-terminal-grid opacity-20 pointer-events-none"></div>
+      <div className="fixed inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-20 pointer-events-none" aria-hidden="true"></div>
       
       {/* Scanline effect */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0 bg-scanlines opacity-20"></div>
+      <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-scanlines bg-[length:100%_2px] opacity-20"></div>
       </div>
       
       <header className="relative z-20 border-b-2 border-terminal-cyan/20 bg-terminal-surface/80 backdrop-blur-sm sticky top-0">
@@ -20,8 +20,9 @@ export function Layout({ children }: { children: ReactNode }) {
           <button 
             onClick={() => navigate('/')} 
             className="font-mono text-lg font-bold tracking-tight flex items-center gap-3 group"
+            aria-label="Navigate to home"
           >
-            <div className="w-10 h-10 border-2 border-terminal-cyan/50 flex items-center justify-center text-terminal-cyan font-mono text-xl group-hover:border-terminal-cyan group-hover:shadow-[0_0_10px_rgba(0,255,255,0.5)] transition-all duration-300">
+            <div className="w-10 h-10 border-2 border-terminal-cyan/50 flex items-center justify-center text-terminal-cyan font-mono text-xl group-hover:border-terminal-cyan group-hover:shadow-[0_0_10px_rgba(0,255,255,0.5)] transition-all duration-300" aria-hidden="true">
               ⧗
             </div>
             <span className="text-terminal-cyan group-hover:text-glow transition-all">CHRONOS</span>

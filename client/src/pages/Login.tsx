@@ -43,16 +43,16 @@ function Login() {
   return (
     <div className="min-h-screen bg-terminal-bg flex items-center justify-center p-4 relative overflow-hidden">
       {/* Terminal grid background */}
-      <div className="absolute inset-0 bg-terminal-grid opacity-20"></div>
+      <div className="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-20" aria-hidden="true"></div>
       
       {/* Animated scanlines */}
-      <div className="absolute inset-0 bg-scanlines opacity-10"></div>
+      <div className="absolute inset-0 bg-scanlines bg-[length:100%_2px] opacity-10" aria-hidden="true"></div>
       
       {/* Corner accents */}
-      <div className="absolute top-0 left-0 w-32 h-32 border-t-2 border-l-2 border-terminal-cyan/20"></div>
-      <div className="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-terminal-lime/20"></div>
-      <div className="absolute bottom-0 left-0 w-32 h-32 border-b-2 border-l-2 border-terminal-orange/20"></div>
-      <div className="absolute bottom-0 right-0 w-32 h-32 border-b-2 border-r-2 border-terminal-cyan/20"></div>
+      <div className="absolute top-0 left-0 w-32 h-32 border-t-2 border-l-2 border-terminal-cyan/20" aria-hidden="true"></div>
+      <div className="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-terminal-lime/20" aria-hidden="true"></div>
+      <div className="absolute bottom-0 left-0 w-32 h-32 border-b-2 border-l-2 border-terminal-orange/20" aria-hidden="true"></div>
+      <div className="absolute bottom-0 right-0 w-32 h-32 border-b-2 border-r-2 border-terminal-cyan/20" aria-hidden="true"></div>
       
       <div className="relative w-full max-w-md z-10">
         {/* Logo/Brand */}
@@ -73,7 +73,7 @@ function Login() {
           
           {error && (
             <div className="mb-6 p-4 border-2 border-terminal-orange/50 bg-terminal-orange/10 font-mono text-xs text-terminal-orange flex items-center gap-2">
-              <span className="text-lg">⚠</span>
+              <span className="text-lg" aria-hidden="true">⚠</span>
               <span>{'>'} ERROR: {error}</span>
             </div>
           )}

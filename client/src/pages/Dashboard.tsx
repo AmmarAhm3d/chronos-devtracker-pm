@@ -82,55 +82,55 @@ function Dashboard() {
       {/* Stats Overview - Terminal Style */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="relative bg-terminal-surface border-2 border-terminal-cyan/30 p-6 overflow-hidden group hover:border-terminal-cyan/60 transition-all duration-300">
-          <div className="absolute inset-0 bg-terminal-grid opacity-50"></div>
-          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-cyan animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-cyan animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-50" aria-hidden="true"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-cyan animate-pulse" aria-hidden="true"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-cyan animate-pulse [animation-delay:0.5s]" aria-hidden="true"></div>
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-3">
               <div className="font-mono text-xs text-terminal-cyan/70 tracking-wider uppercase">
                 [TOTAL_PROJECTS]
               </div>
-              <div className="w-8 h-8 border border-terminal-cyan/30 flex items-center justify-center text-terminal-cyan group-hover:animate-glow-pulse transition-all">
+              <div className="w-8 h-8 border border-terminal-cyan/30 flex items-center justify-center text-terminal-cyan group-hover:animate-glow-pulse transition-all" aria-hidden="true">
                 <span className="font-mono text-lg">█</span>
               </div>
             </div>
             <div className="font-mono text-5xl font-bold text-terminal-cyan mt-2 group-hover:text-glow transition-all">
               {totalProjects.toString().padStart(2, '0')}
             </div>
-            <div className="mt-2 h-0.5 bg-terminal-cyan/20 group-hover:bg-terminal-cyan/40 transition-all"></div>
+            <div className="mt-2 h-0.5 bg-terminal-cyan/20 group-hover:bg-terminal-cyan/40 transition-all" aria-hidden="true"></div>
           </div>
         </div>
         
         <div className="relative bg-terminal-surface border-2 border-terminal-lime/30 p-6 overflow-hidden group hover:border-terminal-lime/60 transition-all duration-300">
-          <div className="absolute inset-0 bg-terminal-grid opacity-50"></div>
-          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-lime animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-lime animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-50" aria-hidden="true"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-lime animate-pulse" aria-hidden="true"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-lime animate-pulse [animation-delay:0.5s]" aria-hidden="true"></div>
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-3">
               <div className="font-mono text-xs text-terminal-lime/70 tracking-wider uppercase">
                 [COMPLETED]
               </div>
-              <div className="w-8 h-8 border border-terminal-lime/30 flex items-center justify-center text-terminal-lime group-hover:animate-glow-pulse transition-all">
+              <div className="w-8 h-8 border border-terminal-lime/30 flex items-center justify-center text-terminal-lime group-hover:animate-glow-pulse transition-all" aria-hidden="true">
                 <span className="font-mono text-lg">✓</span>
               </div>
             </div>
             <div className="font-mono text-5xl font-bold text-terminal-lime mt-2 group-hover:text-glow transition-all">
               {completedProjects.toString().padStart(2, '0')}
             </div>
-            <div className="mt-2 h-0.5 bg-terminal-lime/20 group-hover:bg-terminal-lime/40 transition-all"></div>
+            <div className="mt-2 h-0.5 bg-terminal-lime/20 group-hover:bg-terminal-lime/40 transition-all" aria-hidden="true"></div>
           </div>
         </div>
         
         <div className="relative bg-terminal-surface border-2 border-terminal-orange/30 p-6 overflow-hidden group hover:border-terminal-orange/60 transition-all duration-300">
-          <div className="absolute inset-0 bg-terminal-grid opacity-50"></div>
-          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-orange animate-pulse"></div>
-          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-orange animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-50" aria-hidden="true"></div>
+          <div className="absolute top-0 right-0 w-2 h-2 bg-terminal-orange animate-pulse" aria-hidden="true"></div>
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-terminal-orange animate-pulse [animation-delay:0.5s]" aria-hidden="true"></div>
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-3">
               <div className="font-mono text-xs text-terminal-orange/70 tracking-wider uppercase">
                 [COMPLETION_RATE]
               </div>
-              <div className="w-8 h-8 border border-terminal-orange/30 flex items-center justify-center text-terminal-orange group-hover:animate-glow-pulse transition-all">
+              <div className="w-8 h-8 border border-terminal-orange/30 flex items-center justify-center text-terminal-orange group-hover:animate-glow-pulse transition-all" aria-hidden="true">
                 <span className="font-mono text-lg">%</span>
               </div>
             </div>
@@ -138,7 +138,7 @@ function Dashboard() {
               {completionRate.toString().padStart(2, '0')}
               <span className="text-2xl ml-1">%</span>
             </div>
-            <div className="mt-2 h-0.5 bg-terminal-orange/20 group-hover:bg-terminal-orange/40 transition-all"></div>
+            <div className="mt-2 h-0.5 bg-terminal-orange/20 group-hover:bg-terminal-orange/40 transition-all" aria-hidden="true"></div>
           </div>
         </div>
       </div>

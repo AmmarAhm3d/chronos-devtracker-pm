@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 const MAP: Record<string, string> = {
   TODO: 'TODO',
-  IN_PROGRESS: 'IN_PROG',
+  IN_PROGRESS: 'IN_PROGRESS',
   COMPLETE: 'DONE',
   ON_HOLD: 'HOLD'
 };
@@ -16,6 +16,7 @@ const ICONS: Record<string, ReactNode> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const statusLabel = MAP[status] || status;
   return (
     <span
       className={clsx(
@@ -25,9 +26,10 @@ export function StatusBadge({ status }: { status: string }) {
         status === 'COMPLETE' && 'bg-terminal-lime/10 text-terminal-lime border-terminal-lime/40',
         status === 'ON_HOLD' && 'bg-terminal-gray-800 text-terminal-gray-400 border-terminal-gray-600'
       )}
+      aria-label={`Status: ${statusLabel}`}
     >
-      {ICONS[status]}
-      {MAP[status] || status}
+      <span aria-hidden="true">{ICONS[status]}</span>
+      {statusLabel}
     </span>
   );
 }
